@@ -52,7 +52,7 @@ public class process {
 //    private static final String PCAP_FILE =
 //            System.getProperty(PCAP_FILE_KEY, "src/main/resources/fuzz-2006-07-12-21273.pcap");
 private static final String PCAP_FILE =
-        System.getProperty(PCAP_FILE_KEY, "/home/gucci/Documents/SOP/pcapFiles/smallFlows.pcap");
+        System.getProperty(PCAP_FILE_KEY, "src/main/resources/smallFlows.pcap");
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);
