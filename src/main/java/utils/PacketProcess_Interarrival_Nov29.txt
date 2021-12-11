@@ -1,0 +1,135 @@
+package proj;
+
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.flink.api.common.functions.FilterFunction;
+import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.pcap4j.core.NotOpenException;
+import org.pcap4j.core.PcapHandle;
+import org.pcap4j.core.PcapHandle.TimestampPrecision;
+import org.pcap4j.core.PcapNativeException;
+import org.pcap4j.core.Pcaps;
+import org.pcap4j.packet.Packet;
+import org.pcap4j.packet.TcpPacket;
+import scala.xml.Null;
+import proj.ReadPacketFile;
+
+import java.io.EOFException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeoutException;
+
+public class PacketProcess_Interarrival {
+    private static final int COUNT = 100;
+
+    private static final String PCAP_FILE_KEY = ReadPacketFile.class.getName() + ".pcapFile";
+    private static final String PCAP_FILE =
+            System.getProperty(PCAP_FILE_KEY, "src/main/resources/fuzz-2006-07-12-21273.pcap");
+
+    public static void main(String[] args) throws Exception {
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        // readpacketsfrom file and convert them to a list
+        List<MutablePair<Long, Packet>> packetList = ReadPacketFile();
+        // give list as input source
+//        System.out.println(packetList[0]);
+        DataStream<MutablePair<Long, Packet>> dataStream = env.fromCollection(packetList);
+//        dataStream.filter(new FilterFunction<MutablePair<Long, Packet>>() {
+//            @Override
+//            public boolean filter(MutablePair<Long, Packet> pair) throws Exception {
+//                System.out.println("received");
+//                if (pair == null || pair.getValue() == null) {
+//                    System.out.println("null packet");
+//                    return false;
+//                }
+//                Packet payload = pair.getValue().getPayload();
+//                System.out.println(payload.getClass());
+////                if(pair.getValue() != null) System.out.println(pair.getValue().getRawData());
+//                return payload instanceof TcpPacket;
+//            }
+//        })
+//                .map(new MapFunction<MutablePair<Long, Packet>, MutablePair<Long, Packet>>(){
+//                    @Override
+//                    public MutablePair<Long, Packet> map(MutablePair<Long, Packet> p) throws Exception {
+//                        System.out.println(p);
+//                        Packet payload = p.getValue().getPayload(); //tcp packet
+//                        TcpPacket.TcpHeader header = (TcpPacket.TcpHeader) payload.getHeader();
+//                        Packet tcpData = payload.getPayload(); // tcp payload
+//                        return new MutablePair<Long, Packet>(p.getKey(), tcpData);
+//                    }
+//                })
+                //Below map is edited to get above one.
+//                .map(new MapFunction<Packet, Packet>() {
+//                    @Override
+//                    public Packet map(Packet p) throws Exception {
+//                        System.out.println(p);
+//                        Packet payload = p.getPayload(); //tcp packet
+//                        TcpPacket.TcpHeader header = (TcpPacket.TcpHeader) payload.getHeader();
+//                        Packet tcpData = payload.getPayload(); // tcp payload
+//                        return tcpData;
+//                    }
+//                })
+//                .filter(new FilterFunction<Packet>() {
+//                    @Override
+//                    public boolean filter(Packet packet) throws Exception {
+//                        System.out.println("received on length filter");
+//                        return packet.getRawData().length > 0;
+//                    }
+//                })
+//                .map(new MapFunction<Packet, String>() {
+//
+//                    @Override
+//                    public String map(Packet packet) throws Exception {
+//                        return new String(packet.getRawData());
+//                    }
+//                })
+//                .print();
+
+        try {
+            env.execute("Packet process");
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        // Set as event time and analyze the interarrival time
+        // add the interarrival time to a document
+    }
+
+    private static List<MutablePair<Long, Packet>> ReadPacketFile() throws PcapNativeException, NotOpenException {
+        PcapHandle handle;
+        List<MutablePair<Long, Packet>> packetList = new ArrayList<MutablePair<Long, Packet>>();
+
+        try {
+            handle = Pcaps.openOffline(PCAP_FILE, TimestampPrecision.NANO);
+        }catch(PcapNativeException e){
+            handle = Pcaps.openOffline(PCAP_FILE);
+        }
+
+        for (int i = 1; i <= COUNT; i++) {
+            try {
+                Packet packet = handle.getNextPacketEx();
+                Timestamp timestamp = handle.getTimestamp();
+                /*
+                    timestamp.getTime() returns time in milli seconds. Divide it by 1000 to get seconds int.
+                    Add it to nano object to get Nano precision. Time is in Nano seconds
+                */
+
+                long time = (timestamp.getTime()/1000)*1000000000 + timestamp.getNanos();
+                MutablePair<Long, Packet> pair = new MutablePair<Long, Packet>(time, packet);
+//                System.out.println(pair);
+
+                packetList.add(pair);
+                //System.out.println(handle.getTimestamp());
+                //System.out.println(packet.getHeader());
+                //System.out.println(packet);
+            } catch (TimeoutException e) {
+            } catch (EOFException e) {
+//                System.out.println("EOF");
+                break;
+            }
+        }
+//        MutablePair<Long, Packet> pair = new MutablePair<Long, Packet>(null, null);
+        handle.close();
+        return packetList;
+    }
+}
