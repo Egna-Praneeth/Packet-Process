@@ -110,6 +110,9 @@ public class process_stringIP_Port_currentTime {
                     UdpPort port = udpPacket.getHeader().getDstPort();
                     port_string = port.valueAsString();
                 }
+                else{
+                    continue;
+                }
                 
                  //    timestamp.getTime() returns time in milli seconds. Divide it by 1000 to get seconds int.
                 //    Add it to nano object to get Nano precision. Time is in Nano second 
