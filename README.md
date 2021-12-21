@@ -29,7 +29,10 @@
 We explain executing process_string. Other process functions follow the same pattern.
 1. Import project to IntelliJ
 2. In process_string function, the following details have to be set:
+
 	a. In PCAP_FILE String, give the pcap file path.
+	
 	b. In StreamingFileSink variable, the output path has to be set.
+	
 3. If there is any error in running, then Edit run configuration of IntelliJ -> modify options -> include dependencies with Provided scope
 4. The output file is stored in the path set in 2b. This file has to be copied and pasted in the input.txt file in src/main/resources folder. The aggregate.java function takes input from this file and prints the overall aggregation results on the console.
