@@ -108,7 +108,7 @@ public class process_string {
                                                
             } catch (TimeoutException e) {
             } catch (EOFException e) {
-               System.out.println("EOF");
+//                System.out.println("EOF");
                 break;
             }
         }
