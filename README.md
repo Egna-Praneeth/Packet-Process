@@ -1,25 +1,31 @@
-File details: 
-ReadPacketFile: pcap4j library opensource code to read pcap files
+### File details: 
+**ReadPacketFile**: pcap4j library opensource code to read pcap files
 
 
-process_string: Caluculates the interarrival time between two packets irrespective of any Keyby.
-process_stringIP: keyby IP and calculates average interarrival time. 
-CountTime2: IP is string and uses CustomPair2
-CustomPair2: IP is string
+**process_string**: Calculates the interarrival time between two packets irrespective of any Keyby.
 
-process_stringIP_Port: keyby's IP-Port combination and processes using CountTime3.
-CountTime3: IP_Port is there and uses CustomPair3
-CustomPair3: IP_Port is a field
+**process_stringIP**: keyby IP and calculates average interarrival time. 
 
-process_stringIP_Port_currentTIme: Same as process_stringIP_Port. Only change is it uses currentTime which is being set in CountCurrentTimewise
-CountCurrentTimeWise3: setting timestap as System.nanos
+**CountTime2**: IP is string and uses CustomPair2
 
-process_stringIP_Port_randomTime: We set timestamp with random values in this function-> in the readpacketfile code part.
+**CustomPair2**: IP is string
 
-aggregate.java : Takes the output of process functions as input and summarizes the statistics
+**process_stringIP_Port**: keyby's IP-Port combination and processes using CountTime3.
+
+**CountTime3**: IP_Port is there and uses CustomPair3
+
+**CustomPair3**: IP_Port is a field
+
+**process_stringIP_Port_currentTime**: Same as process_stringIP_Port. Only change is it uses currentTime which is being set in CountCurrentTimewise
+
+**CountCurrentTimeWise3**: setting timestap as System.nanos
+
+**process_stringIP_Port_randomTime**: We set timestamp with random values in this function-> in the readpacketfile code part.
+
+**aggregate.java** : Takes the output of process functions as input and summarizes the statistics
 
 
-Way to Execute: 
+### Way to Execute: 
 We explain executing process_string. Other process functions follow the same pattern.
 1. Import project to IntelliJ
 2. In process_string function, the following details have to be set:
