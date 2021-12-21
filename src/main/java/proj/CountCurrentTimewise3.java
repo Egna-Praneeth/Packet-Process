@@ -21,9 +21,6 @@ public class CountCurrentTimewise3 extends KeyedProcessFunction<String,CustomPai
 
     @Override
     public void processElement(CustomPair3 element, Context ctx, Collector<String> out) throws Exception{
-//        System.out.println("Step 4: In process Element function");
-//        System.out.println(element.getTimestamp());
-//        System.out.println(element.getIpAddress());
         CountValues current = state.value();
         element.setTimestamp(System.nanoTime());
         System.out.println(element.getTimestamp());
@@ -38,14 +35,10 @@ public class CountCurrentTimewise3 extends KeyedProcessFunction<String,CustomPai
             current.sumTime += element.getTimestamp() - current.lastTime;
             current.lastTime = element.getTimestamp();
         }
-//        System.out.println(current.pktCount + " " + current.sumTime + " "+ current.lastTime);
         state.update(current);
         if(current.pktCount != 1){
-            String s = "pktcount: " + current.pktCount + "; IP: " + element.getIpAddressPort() + " FlowRate: " + (1000000000L) * current.pktCount / current.sumTime + " pkts/sec; Interarrival Time upto now is: " + current.sumTime / (current.pktCount - 1) + " ns";
-
-            //        if(current.pktCount != 1)out.collect(new Tuple2<String, Long>(s, current.sumTime/(current.pktCount - 1)));
+            String s = "pktcount: " + current.pktCount + "; IP: " + element.getIpAddressPort() + " FlowRate: " + (1000000000L) * current.pktCount / current.sumTime + " pkts/sec; Interarrival Time upto now is: " + current.sumTime / (current.pktCount - 1) + " ns";         
             out.collect(s);
         }
-//            ctx.timerService().registerEventTimeTimer(ctx.timestamp() + );
     }
 }
